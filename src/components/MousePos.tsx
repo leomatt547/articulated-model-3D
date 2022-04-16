@@ -94,6 +94,21 @@ const MousePos = () => {
                     }}
                 />
             </div>
+            <div className="slidercontainer">
+                <input type="range" min="0" max="180" className="slider"
+                    id="rot_slider_balok"
+                    onChange={(e) => {
+                        console.log('Slider event')
+                        const elem = document.getElementById('canvas')
+                        elem.dispatchEvent(new CustomEvent('ui-rotate', {
+                            detail: {
+                                rot: e.target.value,
+                                id: 5
+                            }
+                        }))
+                    }}
+                />
+            </div>
         </div>
     )
 }

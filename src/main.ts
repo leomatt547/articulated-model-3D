@@ -196,6 +196,9 @@ async function main() {
             case 4:
                 balok.setRotation(appState.rotation, appState.rotation, appState.rotation)
                 break;
+            case 5:
+                balok.setFieldOfView(appState.rotation)
+                break;
         
             default:
                 break;

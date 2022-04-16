@@ -15,6 +15,7 @@ class GLObject {
     public wireIndices: Uint16Array;
     public shader: WebGLProgram;
     public wireShader: WebGLProgram | null = null;
+    public FieldOfView: number;
     public pos: [number, number, number];
     public rot3: [number, number, number];
     public scale: [number, number, number];
@@ -51,6 +52,7 @@ class GLObject {
         ]
         this.parentAnchorPoint = [0,0,0]
         this.rot3 = [0,0,0]
+        this.FieldOfView = 60
         this.scale = [1,1,1]
         // console.log(this.parentTransfomationMatrix)
     }
@@ -99,6 +101,11 @@ class GLObject {
 
     setRotation(x: number, y: number, z: number) {
         this.rot3 = [x,y,z];
+        this.projectionMat = this.calcProjectionMatrix()
+    }
+
+    setFieldOfView(a: number) {
+        this.FieldOfView = a;
         this.projectionMat = this.calcProjectionMatrix()
     }
 
@@ -433,7 +440,7 @@ class GLObject {
         var textureLocation = gl.getUniformLocation(this.shader, "u_texture");
         var worldCameraPositionLocation = gl.getUniformLocation(this.shader, "u_worldCameraPosition");
         
-        var fieldOfViewRadians = this.degToRad(60);
+        var fieldOfViewRadians = this.degToRad(this.FieldOfView);
         var modelXRotationRadians = this.degToRad(0);
         var modelYRotationRadians = this.degToRad(0);
         var cameraYRotationRadians = this.degToRad(0);
@@ -448,8 +455,7 @@ class GLObject {
         gl.uniformMatrix4fv(projectionLocation, false, this.projectionMat)
         // Compute the projection matrix
         var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-        var projectionMatrix =
-            perspective(fieldOfViewRadians, aspect, 1, 2000);
+        var projectionMatrix = perspective(fieldOfViewRadians, aspect, 1, 2000);
         gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
 
         var cameraPosition = [0, 0, 2];
