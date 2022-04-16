@@ -6,6 +6,7 @@ import { fetchShader } from './loaders/shader'
 import GLObject from './GLObject'
 import Renderer from './renderer'
 import makeCube from './models/cube'
+import makeBalok from './models/balok'
 
 var canvas = document.getElementById('canvas') as HTMLCanvasElement
 canvas.width = 800
@@ -68,6 +69,26 @@ async function main() {
     gl.attachShader(wireShaderProgram, wireVertShader)
     gl.attachShader(wireShaderProgram, wireFragShader)
     gl.linkProgram(wireShaderProgram)
+
+    var envVert = await fetchShader('env-vert.glsl')
+    var envFrag = await fetchShader('env-frag.glsl')
+
+    var envVertShader = gl.createShader(gl.VERTEX_SHADER)
+    gl.shaderSource(envVertShader, envVert)
+    gl.compileShader(envVertShader)
+    if (!gl.getShaderParameter(envVertShader, gl.COMPILE_STATUS)) {
+        alert('Error when compiling shaders: ' + gl.getShaderInfoLog(envVertShader))
+    }
+    var envFragShader = gl.createShader(gl.FRAGMENT_SHADER)
+    gl.shaderSource(envFragShader, envFrag)
+    gl.compileShader(envFragShader)
+    if (!gl.getShaderParameter(envFragShader, gl.COMPILE_STATUS)) {
+        alert('Error when compiling shaders: ' + gl.getShaderInfoLog(envFragShader))
+    }
+    var envShaderProgram = gl.createProgram()
+    gl.attachShader(envShaderProgram, envVertShader)
+    gl.attachShader(envShaderProgram, envFragShader)
+    gl.linkProgram(envShaderProgram)
 
 
     /* var selectVert = await fetchShader('select-vert.glsl')
@@ -147,22 +168,33 @@ async function main() {
     glObject2.addChild(glObject3)
     glObject.addChild(glObject2)
 
+    const balok = makeBalok(0, envShaderProgram, gl)
+    balok.setAnchorPoint([0,0,0], 3)
+    balok.setPosition(200,200,0)
+    balok.setRotation(0,45,0)
+    balok.setScale(1,1,1)
+    // balok.setWireShader(wireShaderProgram)
+    balok.bindEnv()
+
     canvas.addEventListener('ui-rotate', (e: CustomEvent) => {
         console.log('ui-rotate event')
         appState.rotation = e.detail.rot;
         console.log('appstate-rot' + appState.rotation)
         switch (e.detail.id) {
-            case 0:
-                glObject.setRotation(appState.rotation, appState.rotation, appState.rotation)
-                break;
-            case 1:
-                glObject2.setRotation(appState.rotation, appState.rotation, appState.rotation)
-                break;
-            case 2:
-                glObject3.setRotation(appState.rotation, appState.rotation, appState.rotation)
-                break;
-            case 3:
-                glObject4.setRotation(appState.rotation, appState.rotation, appState.rotation)
+            // case 0:
+            //     glObject.setRotation(appState.rotation, appState.rotation, appState.rotation)
+            //     break;
+            // case 1:
+            //     glObject2.setRotation(appState.rotation, appState.rotation, appState.rotation)
+            //     break;
+            // case 2:
+            //     glObject3.setRotation(appState.rotation, appState.rotation, appState.rotation)
+            //     break;
+            // case 3:
+            //     glObject4.setRotation(appState.rotation, appState.rotation, appState.rotation)
+            //     break;
+            case 4:
+                balok.setRotation(appState.rotation, appState.rotation, appState.rotation)
                 break;
         
             default:
@@ -175,7 +207,8 @@ async function main() {
     })
 
     const renderer = new Renderer()
-    renderer.addObject(glObject);
+    // renderer.addObject(glObject);
+    renderer.addObject(balok);
 
     function render(now: number) {
         gl.viewport(0,0, gl.canvas.width, gl.canvas.height)
@@ -196,7 +229,7 @@ async function main() {
         gl.bindFramebuffer(gl.FRAMEBUFFER, null) */
         // draw the actual objects
         gl.useProgram(shaderProgram)
-        renderer.render()
+        renderer.renderEnv()
         requestAnimationFrame(render)
     }
     requestAnimationFrame(render)

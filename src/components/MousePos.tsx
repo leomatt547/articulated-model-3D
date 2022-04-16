@@ -19,7 +19,7 @@ const MousePos = () => {
         <div id="rt-mousepos">
             <p>Mouse X: {mousePos.x}</p>
             <p>Mouse Y: {mousePos.y}</p>
-            <div className="slidercontainer">
+            {/* <div className="slidercontainer">
                 <input type="range" min="-180" max="180" className="slider"
                     id="rot_slider1"
                     onChange={(e) => {
@@ -74,6 +74,21 @@ const MousePos = () => {
                             detail: {
                                 rot: e.target.value,
                                 id: 3
+                            }
+                        }))
+                    }}
+                />
+            </div> */}
+            <div className="slidercontainer">
+                <input type="range" min="-180" max="180" className="slider"
+                    id="rot_slider_balok"
+                    onChange={(e) => {
+                        console.log('Slider event')
+                        const elem = document.getElementById('canvas')
+                        elem.dispatchEvent(new CustomEvent('ui-rotate', {
+                            detail: {
+                                rot: e.target.value,
+                                id: 4
                             }
                         }))
                     }}

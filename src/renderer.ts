@@ -25,6 +25,12 @@ class Renderer {
             obj.draw()
         }
     }
+
+    renderEnv() {
+        for (const obj of this.objectList) {
+            obj.drawEnv()
+        }
+    }
 }
 
 export default Renderer
