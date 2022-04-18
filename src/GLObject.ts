@@ -14,7 +14,9 @@ class GLObject {
     public normals: number[];
     public wireIndices: Uint16Array;
     public shader: WebGLProgram;
+    public env_shader: WebGLProgram;
     public wireShader: WebGLProgram | null = null;
+    public colors: number[];
     public FieldOfView: number;
     public pos: [number, number, number];
     public rot3: [number, number, number];
@@ -28,7 +30,9 @@ class GLObject {
     public vbo: WebGLBuffer
     public vboIndices: WebGLBuffer
     public vboNormals: WebGLBuffer
+    public vboColors: WebGLBuffer
     public wireBuffer: WebGLBuffer
+    public colorBuffer: WebGLBuffer
 
     public sceneDepth: number;
 
@@ -70,6 +74,10 @@ class GLObject {
         this.points = points;
     }
 
+    setColors(colors: number[]) {
+        this.colors = colors;
+    }
+
     setIndices(indices: number[]) {
         this.indices = indices;
 
@@ -104,6 +112,11 @@ class GLObject {
         this.projectionMat = this.calcProjectionMatrix()
     }
 
+    setRotationSpecific(x: number, y: number, z: number) {
+        this.rot3 = [0,45,z];
+        this.projectionMat = this.calcProjectionMatrix()
+    }
+
     setFieldOfView(a: number) {
         this.FieldOfView = a;
         this.projectionMat = this.calcProjectionMatrix()
@@ -118,6 +131,10 @@ class GLObject {
         if (!this.childs.find(x => x.id === obj.id)) {
             this.childs.push(obj);
         }
+    }
+
+    set_env_shader(env_shader: WebGLProgram){
+        this.env_shader = env_shader;
     }
 
     setWireShader(shader: WebGLProgram) {
@@ -271,9 +288,22 @@ class GLObject {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vboIndices)
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW)
         const wireBuffer = gl.createBuffer()
+
+        // const vboColors = gl.createBuffer()
+        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vboColors)
+        // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(this.colors), gl.STATIC_DRAW)
+        // const colorBuffer = gl.createBuffer()
         
         this.vbo = vbo
         this.vboIndices = vboIndices
+        // this.vboColors = vboColors
+
+        // if(this.colors !== null){
+        //     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.colors), gl.STATIC_DRAW);
+        //     // gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer)
+        //     // gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW)
+        //     // this.wireBuffer = wireBuffer
+        // }
 
         if(this.wireShader !== null) {
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, wireBuffer)
@@ -285,8 +315,8 @@ class GLObject {
 
     bindEnv() {
         const gl = this.gl
-        const vbo = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+        const vbo2 = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo2)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.points), gl.STATIC_DRAW)
         
         // const vboIndices = gl.createBuffer()
@@ -356,7 +386,7 @@ class GLObject {
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
 
-        this.vbo = vbo
+        this.vbo = vbo2
         this.vboNormals = vboNormals
         // this.texture = texture
 
@@ -378,12 +408,20 @@ class GLObject {
         var uniformCol = gl.getUniformLocation(this.shader, 'u_fragColor')
         var uniformPos = gl.getUniformLocation(this.shader, 'u_proj_mat')
         var uniformRes = gl.getUniformLocation(this.shader, 'u_resolution')
+
+        // lookup uniforms
+        var projectionLocation = gl.getUniformLocation(this.env_shader, "u_projection");
+        var viewLocation = gl.getUniformLocation(this.env_shader, "u_view");
+        var worldLocation = gl.getUniformLocation(this.env_shader, "u_world");
+        var worldCameraPositionLocation = gl.getUniformLocation(this.env_shader, "u_worldCameraPosition");
+        
+        var fieldOfViewRadians = this.degToRad(this.FieldOfView);
         
         gl.enableVertexAttribArray(vertexPos)
         gl.vertexAttribPointer(vertexPos, 3, gl.FLOAT, false, 0, 0)
         // console.log(this.projectionMat)
         gl.uniformMatrix4fv(uniformPos, false, this.projectionMat)
-        gl.uniform4fv(uniformCol, [1.0, 0.0, 0.0, 1.0])
+        gl.uniform4fv(uniformCol, [0.5, 1.0, 0.5, 1.0])
         gl.uniform3fv(uniformRes, [gl.canvas.width, gl.canvas.height, this.sceneDepth])
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.vboIndices)
@@ -404,6 +442,28 @@ class GLObject {
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.wireBuffer)
             gl.drawElements(gl.LINES, this.wireIndices.length, gl.UNSIGNED_SHORT, 0)
         } 
+
+        var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+        var projectionMatrix = perspective(fieldOfViewRadians, aspect, 1, 2000);
+        gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
+
+        var cameraPosition = [0, 0, 2];
+        var target = [0, 0, 0];
+        var up = [0, 1, 0];
+        // Compute the camera's matrix using look at.
+        var cameraMatrix = lookAt(cameraPosition, target, up);
+
+        // Make a view matrix from the camera matrix.
+        var viewMatrix = inverse(cameraMatrix);
+
+        var worldMatrix = xRotation(this.degToRad(this.rot3[0]));
+        worldMatrix = yRotate(worldMatrix, this.degToRad(this.rot3[1]));
+
+        // Set the uniforms
+        gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
+        gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
+        gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
+        gl.uniform3fv(worldCameraPositionLocation, cameraPosition);
 
         const proj = this.calcProjectionMatrix()
         // if (this.id === 0)

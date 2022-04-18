@@ -7,6 +7,8 @@ import GLObject from './GLObject'
 import Renderer from './renderer'
 import makeCube from './models/cube'
 import makeBalok from './models/balok'
+import makeBalokKecil from './models/balok_kecil'
+import makePyramid from './models/pyramid'
 
 var canvas = document.getElementById('canvas') as HTMLCanvasElement
 canvas.width = 800
@@ -131,50 +133,70 @@ async function main() {
 
     }, false)
 
-    const glObject = makeCube(0, shaderProgram, gl)
-    glObject.setAnchorPoint([0,0,0], 3)
-    glObject.setPosition(200,200,0)
-    glObject.setRotation(0,45,0)
-    glObject.setScale(1,1,1)
-    glObject.setWireShader(wireShaderProgram)
-    glObject.bind()
+    // const glObject = makeCube(0, shaderProgram, gl)
+    // glObject.setAnchorPoint([0,0,0], 3)
+    // glObject.setPosition(200,200,0)
+    // glObject.setRotation(0,45,0)
+    // glObject.setScale(1,1,1)
+    // glObject.setWireShader(wireShaderProgram)
+    // glObject.bind()
 
-    const glObject2 = makeCube(1, shaderProgram, gl)
-    glObject2.setAnchorPoint(glObject.getPoint(4), 3)
-    glObject2.setPosition(0,0,0)
-    glObject2.setRotation(0,0,0)
-    glObject2.setScale(1,1,1)
-    glObject2.setWireShader(wireShaderProgram)
-    glObject2.bind()
+    // const glObject2 = makeCube(1, shaderProgram, gl)
+    // glObject2.setAnchorPoint(glObject.getPoint(4), 3)
+    // glObject2.setPosition(0,0,0)
+    // glObject2.setRotation(0,0,0)
+    // glObject2.setScale(1,1,1)
+    // glObject2.setWireShader(wireShaderProgram)
+    // glObject2.bind()
 
-    const glObject3 = makeCube(2, shaderProgram, gl)
-    glObject3.setAnchorPoint(glObject2.getPoint(2), 3)
-    glObject3.setPosition(0,0,0)
-    glObject3.setRotation(0,0,0)
-    glObject3.setScale(1,1,1)
-    glObject3.setWireShader(wireShaderProgram)
-    glObject3.bind()
+    // const glObject3 = makeCube(2, shaderProgram, gl)
+    // glObject3.setAnchorPoint(glObject2.getPoint(2), 3)
+    // glObject3.setPosition(0,0,0)
+    // glObject3.setRotation(0,0,0)
+    // glObject3.setScale(1,1,1)
+    // glObject3.setWireShader(wireShaderProgram)
+    // glObject3.bind()
 
-    const glObject4 = makeCube(3, shaderProgram, gl)
-    glObject4.setAnchorPoint(glObject4.getPoint(1), 3)
-    glObject4.setPosition(0,0,0)
-    glObject4.setRotation(0,0,0)
-    glObject4.setScale(1,1,1)
-    glObject4.setWireShader(wireShaderProgram)
-    glObject4.bind()
+    // const glObject4 = makeCube(3, shaderProgram, gl)
+    // glObject4.setAnchorPoint(glObject4.getPoint(1), 3)
+    // glObject4.setPosition(0,0,0)
+    // glObject4.setRotation(0,0,0)
+    // glObject4.setScale(1,1,1)
+    // glObject4.setWireShader(wireShaderProgram)
+    // glObject4.bind()
 
-    // parent;
-    glObject3.addChild(glObject4)
-    glObject2.addChild(glObject3)
-    glObject.addChild(glObject2)
+    // // parent;
+    // glObject3.addChild(glObject4)
+    // glObject2.addChild(glObject3)
+    // glObject.addChild(glObject2)
 
     const balok = makeBalok(0, envShaderProgram, gl)
     balok.setAnchorPoint([0,0,0], 3)
     balok.setPosition(200,200,0)
-    balok.setRotation(0,45,0)
+    balok.setRotation(0,25,0)
     balok.setScale(1,1,1)
     // balok.setWireShader(wireShaderProgram)
     balok.bindEnv()
+
+    const balok2 = makeCube(1, shaderProgram, gl)
+    balok2.setAnchorPoint(balok.getPoint(0), 3)
+    balok2.setPosition(0,0,0)
+    balok2.setRotation(0,0,0)
+    balok2.setScale(1,1,1)
+    balok2.set_env_shader(envShaderProgram)
+    balok2.setWireShader(wireShaderProgram)
+    balok2.bind() 
+
+
+    // const pyramid1 = makePyramid(1, shaderProgram, gl)
+    // pyramid1.setAnchorPoint(balok.getPoint(4), 3)
+    // pyramid1.setPosition(0,0,0)
+    // pyramid1.setRotation(0,0,0)
+    // pyramid1.setScale(1,1,1)
+    // // pyramid1.setWireShader(wireShaderProgram)
+    // pyramid1.bind()
+
+    balok.addChild(balok2)
 
     canvas.addEventListener('ui-rotate', (e: CustomEvent) => {
         console.log('ui-rotate event')
@@ -194,10 +216,13 @@ async function main() {
             //     glObject4.setRotation(appState.rotation, appState.rotation, appState.rotation)
             //     break;
             case 4:
-                balok.setRotation(appState.rotation, appState.rotation, appState.rotation)
+                // balok.setRotation(appState.rotation, appState.rotation, appState.rotation)
+                balok2.setRotationSpecific(appState.rotation, appState.rotation, appState.rotation)
                 break;
             case 5:
                 balok.setFieldOfView(appState.rotation)
+                balok2.setFieldOfView(appState.rotation)
+                // balok2.setScale(1-appState.rotation/180, 1-appState.rotation/180, 1-appState.rotation/180)
                 break;
         
             default:
@@ -212,6 +237,7 @@ async function main() {
     const renderer = new Renderer()
     // renderer.addObject(glObject);
     renderer.addObject(balok);
+    // renderer.addObject(pyramid1);
 
     function render(now: number) {
         gl.viewport(0,0, gl.canvas.width, gl.canvas.height)

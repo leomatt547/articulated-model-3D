@@ -10,10 +10,10 @@ function makeCube(id: number, shader: WebGLProgram, gl: WebGL2RenderingContext) 
     0,0,baseVal,
 
     //top vertcies
-    0,baseVal,0,
-    baseVal,baseVal,0,
-    baseVal,baseVal,baseVal,
-    0,baseVal,baseVal,
+    0,baseVal+100,0,
+    baseVal,baseVal+100,0,
+    baseVal,baseVal+100,baseVal,
+    0,baseVal+100,baseVal,
   ]
 
   const indices = [
