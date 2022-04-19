@@ -1,5 +1,5 @@
 "use strict";
-let MatType = Array;
+let MatType = Float32Array;
 let obj = Object;
 let input = Object;
 let selected_id = Number;
@@ -154,7 +154,17 @@ function main() {
       obj[index].buffer = new Float32Array(obj[index].buffer);
       obj[index].color = new Uint8Array(obj[index].color);
       obj[index].translation = new Float32Array(obj[index].translation);
+      // console.log(obj[index].normal)
+      if(obj[index].normal != undefined){
+        obj[index].normal = new Float32Array(obj[index].normal);
+      }
       obj[index].scale  = [1,1,1];
+      // console.log(obj[index].rotation)
+      if(obj[index].rotation == undefined){
+        obj[index].rotation = [degToRad(0),degToRad(0),degToRad(0)];
+      }else{
+        obj[index].rotation = [degToRad(obj[index].rotation[0]),degToRad(obj[index].rotation[1]),degToRad(obj[index].rotation[2])];
+      }
       obj[index].rotation = [degToRad(0),degToRad(0),degToRad(0)];
       obj[index].iscolor = false;
       // console.log(obj[index].childs);
@@ -179,7 +189,7 @@ function main() {
   // Get A WebGL context
   /** @type {HTMLCanvasElement} */
   var canvas = document.querySelector("#content");
-  var gl = canvas.getContext("webgl2");
+  const gl = canvas.getContext("webgl2");
   if (!gl) {
     return;
   }
@@ -223,8 +233,8 @@ function main() {
       const shaders = [];
       for (let ii = 0; ii < shaderScriptIds.length; ++ii) {
         shaders.push(createShaderFromScript(
-            gl, shaderScriptIds[ii], gl[defaultShaderType[ii]], opt_errorCallback));
-      }
+          gl, shaderScriptIds[ii], gl[defaultShaderType[ii]], opt_errorCallback));
+        }
       return createProgram(gl, shaders, opt_attribs, opt_locations, opt_errorCallback);
   }
   function createShaderFromScript(
@@ -430,6 +440,7 @@ function main() {
   }
   // Draw the scene.
   function drawScene(){
+    // Draw the scene env.
     if(input_change){
       // Clear the canvas AND the depth buffer.
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -463,93 +474,269 @@ function main() {
     var viewMatrix = m4.inverse(cameraMatrix);
     // Compute a view projection matrix
     var viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
-    for(var index=0; index<Object.size(obj); index++){
-      var program = createProgramFromScripts(gl, ["vertex-shader-3d", "fragment-shader-3d"]);
-      // look up where the vertex data needs to go.
-      var positionLocation = gl.getAttribLocation(program, "a_position");
-      var colorLocation = gl.getAttribLocation(program, "a_color");
-      // lookup uniforms
-      var matrixLocation = gl.getUniformLocation(program, "u_matrix");
-      // Create a buffer to put positions in
-      var positionBuffer = gl.createBuffer();
-      // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-      // Create a buffer to put colors in
-      var colorBuffer = gl.createBuffer();
-      // Put geometry data into buffer
-      resizeCanvasToDisplaySize(gl.canvas, 1);
-      // Tell WebGL how to convert from clip space to pixels
-      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-      // Turn on culling. By default backfacing triangles
-      // will be culled.
-      gl.enable(gl.CULL_FACE);
-      // Enable the depth buffer
-      gl.enable(gl.DEPTH_TEST);
-      // Tell it to use our program (pair of shaders)
-      gl.useProgram(program);
-      // Turn on the position attribute
-      gl.enableVertexAttribArray(positionLocation);
-      // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
-      var size = 3;          // 3 components per iteration
-      var type = gl.FLOAT;   // the data is 32bit floats
-      var normalize = false; // don't normalize the data
-      var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-      var offset = 0;        // start at the beginning of the buffer
-      gl.vertexAttribPointer(
-          positionLocation, size, type, normalize, stride, offset);
-      // Put geometry data into buffer
-      setGeometry(gl, obj[index].buffer);
-      // Turn on the color attribute
-      gl.enableVertexAttribArray(colorLocation);
-      // Bind the color buffer.
-      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-      // Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
-      var size = 3;                 // 3 components per iteration
-      var type = gl.UNSIGNED_BYTE;  // the data is 8bit unsigned values
-      var normalize = true;         // normalize the data (convert from 0-255 to 0-1)
-      var stride = 0;               // 0 = move forward size * sizeof(type) each iteration to get the next position
-      var offset = 0;               // start at the beginning of the buffer
-      gl.vertexAttribPointer(
-          colorLocation, size, type, normalize, stride, offset);
-      // Set the matrix.
-      // Compute the matrices for each object.
-      // ------ Draw the objects --------
-      switch(viewing){
-        case 0:
-          var matrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
-          break;
-        case 1:
-          var matrix = m4.orthographic(left, right, bottom, top, zNear, zFar);
-          break;
-        case 2:
-          var oblique = m4.oblique(-45, -45);
-          var matrix = m4.multiply(oblique, m4.orthographic(left, right, bottom, top, zNear, zFar));
-          break;
-      };
 
-      // // Setup all the needed attributes.
-      if(obj[index].iscolor){
-        setColors(gl, obj[index].color);
+    //ITERASI 3 object kelompok
+    for(var index=0; index<Object.size(obj); index++){
+      // ENVIRONTMENT MAPS
+      if(obj[index].normal != undefined){
+        // setup GLSL program
+        const program = createProgramFromScripts(gl, ["vertex-shader-3d-env", "fragment-shader-3d-env"]);
+        // look up where the vertex data needs to go.
+        const positionLocation = gl.getAttribLocation(program, "a_position");
+        const normalLocation = gl.getAttribLocation(program, "a_normal");
+
+        // lookup uniforms
+        const projectionLocation = gl.getUniformLocation(program, "u_projection");
+        const viewLocation = gl.getUniformLocation(program, "u_view");
+        const worldLocation = gl.getUniformLocation(program, "u_world");
+        const textureLocation = gl.getUniformLocation(program, "u_texture");
+        const worldCameraPositionLocation = gl.getUniformLocation(program, "u_worldCameraPosition");
+
+        // Create a buffer for positions
+        const positionBuffer = gl.createBuffer();
+        // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        // Put the positions in the buffer
+        setGeometry(gl, obj[index].buffer);
+
+        // Create a buffer to put normals in
+        const normalBuffer = gl.createBuffer();
+        // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = normalBuffer)
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        // Put normals data into buffer
+        setNormals(gl, obj[index].normal);
+
+        // Create a texture.
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+
+        const faceInfos = [
+          {
+            target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+            // url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-x.jpg',
+            url: './asset/pos-x.jpg'
+          },
+          {
+            target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+            // url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-x.jpg',
+            url: './asset/neg-x.jpg'
+          },
+          {
+            target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+            // url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-y.jpg',
+            url: './asset/pos-y.jpg'
+          },
+          {
+            target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+            // url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-y.jpg',
+            url: './asset/neg-y.jpg'
+          },
+          {
+            target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+            // url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-z.jpg',
+            url: './asset/pos-z.jpg'
+          },
+          {
+            target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+            // url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-z.jpg',
+            url: './asset/neg-z.jpg'
+          },
+        ];
+        faceInfos.forEach((faceInfo) => {
+          const {target, url} = faceInfo;
+
+          // Upload the canvas to the cubemap face.
+          const level = 0;
+          const internalFormat = gl.RGBA;
+          const width = 512;
+          const height = 512;
+          const format = gl.RGBA;
+          const type = gl.UNSIGNED_BYTE;
+
+          // setup each face so it's immediately renderable
+          gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
+
+          // Asynchronously load an image
+          const image = new Image();
+          // image.crossOrigin = "anonymous";
+          image.src = url;
+          // image.addEventListener('load', function() {
+          //   // Now that the image has loaded make copy it to the texture.
+          //   console.log("Masuk");
+          //   // gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+          //   // gl.texImage2D(target, level, internalFormat, format, type, image);
+          //   // gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+          // });
+          gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+          gl.texImage2D(target, level, internalFormat, format, type, image);
+          gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        });
+        gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+
+        // requestAnimationFrame(drawSceneEnv);
+        resizeCanvasToDisplaySize(gl.canvas);
+
+        // Tell WebGL how to convert from clip space to pixels
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+        gl.enable(gl.CULL_FACE);
+        gl.enable(gl.DEPTH_TEST);
+
+        // Clear the canvas AND the depth buffer.
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // Tell it to use our program (pair of shaders)
+        gl.useProgram(program);
+
+        // Turn on the position attribute
+        gl.enableVertexAttribArray(positionLocation);
+
+        // Bind the position buffer.
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+        // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+        var size = 3;          // 3 components per iteration
+        var type = gl.FLOAT;   // the data is 32bit floats
+        var normalize = false; // don't normalize the data
+        var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+        var offset = 0;        // start at the beginning of the buffer
+        gl.vertexAttribPointer(
+            positionLocation, size, type, normalize, stride, offset);
+
+        // Turn on the normal attribute
+        gl.enableVertexAttribArray(normalLocation);
+
+        // Bind the normal buffer.
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+
+        // Tell the attribute how to get data out of normalBuffer (ARRAY_BUFFER)
+        var size = 3;          // 3 components per iteration
+        var type = gl.FLOAT;   // the data is 32bit floating point values
+        var normalize = false; // normalize the data (convert from 0-255 to 0-1)
+        var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+        var offset = 0;        // start at the beginning of the buffer
+        gl.vertexAttribPointer(
+            normalLocation, size, type, normalize, stride, offset);
+
+        // Compute the projection matrix
+        const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+        const projectionMatrix =
+            m4.perspective(fieldOfViewRadians, aspect, 1, 2000);
+        gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
+
+        const cameraPosition = [0, 0, 2];
+        const target = [0, 0, 0];
+        const up = [0, 1, 0];
+        // Compute the camera's matrix using look at.
+        const cameraMatrix = m4.lookAt(cameraPosition, target, up);
+
+        // Make a view matrix from the camera matrix.
+        const viewMatrix = m4.inverse(cameraMatrix);
+
+        var worldMatrix = m4.xRotation(obj[index].rotation[0]);
+        worldMatrix = m4.yRotate(worldMatrix, obj[index].rotation[1]);
+
+        // Set the uniforms
+        gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
+        gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
+        gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
+        gl.uniform3fv(worldCameraPositionLocation, cameraPosition);
+
+        // Tell the shader to use texture unit 0 for u_texture
+        gl.uniform1i(textureLocation, 0);
+
+        // Draw the geometry.
+        gl.drawArrays(gl.TRIANGLES, 0, 6 * 6);
+
       }else{
-        setColorsWhite(gl);
+        var program = createProgramFromScripts(gl, ["vertex-shader-3d", "fragment-shader-3d"]);
+        // look up where the vertex data needs to go.
+        var positionLocation = gl.getAttribLocation(program, "a_position");
+        var colorLocation = gl.getAttribLocation(program, "a_color");
+        // lookup uniforms
+        var matrixLocation = gl.getUniformLocation(program, "u_matrix");
+        // Create a buffer to put positions in
+        const positionBuffer = gl.createBuffer();
+        // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        // Create a buffer to put colors in
+        var colorBuffer = gl.createBuffer();
+        // Put geometry data into buffer
+        resizeCanvasToDisplaySize(gl.canvas, 1);
+        // Tell WebGL how to convert from clip space to pixels
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        // Turn on culling. By default backfacing triangles
+        // will be culled.
+        gl.enable(gl.CULL_FACE);
+        // Enable the depth buffer
+        gl.enable(gl.DEPTH_TEST);
+        // Tell it to use our program (pair of shaders)
+        gl.useProgram(program);
+        // Turn on the position attribute
+        gl.enableVertexAttribArray(positionLocation);
+        // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+        var size = 3;          // 3 components per iteration
+        var type = gl.FLOAT;   // the data is 32bit floats
+        var normalize = false; // don't normalize the data
+        var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+        var offset = 0;        // start at the beginning of the buffer
+        gl.vertexAttribPointer(
+            positionLocation, size, type, normalize, stride, offset);
+        // Put geometry data into buffer
+        setGeometry(gl, obj[index].buffer);
+        // Turn on the color attribute
+        gl.enableVertexAttribArray(colorLocation);
+        // Bind the color buffer.
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+        // Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
+        var size = 3;                 // 3 components per iteration
+        var type = gl.UNSIGNED_BYTE;  // the data is 8bit unsigned values
+        var normalize = true;         // normalize the data (convert from 0-255 to 0-1)
+        var stride = 0;               // 0 = move forward size * sizeof(type) each iteration to get the next position
+        var offset = 0;               // start at the beginning of the buffer
+        gl.vertexAttribPointer(
+            colorLocation, size, type, normalize, stride, offset);
+        // Set the matrix.
+        // Compute the matrices for each object.
+        // ------ Draw the objects --------
+        switch(viewing){
+          case 0:
+            var matrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
+            break;
+          case 1:
+            var matrix = m4.orthographic(left, right, bottom, top, zNear, zFar);
+            break;
+          case 2:
+            var oblique = m4.oblique(-45, -45);
+            var matrix = m4.multiply(oblique, m4.orthographic(left, right, bottom, top, zNear, zFar));
+            break;
+        };
+
+        // // Setup all the needed attributes.
+        if(obj[index].iscolor){
+          setColors(gl, obj[index].color);
+        }else{
+          setColorsWhite(gl);
+        }
+        var uniforms = computeMatrix(
+          matrix,
+          viewProjectionMatrix,
+          obj[index].translation,
+          obj[index].rotation,
+          obj[index].scale);
+        
+        // Set the uniforms we just computed
+        // twgl.setUniforms(programInfo, object.uniforms);
+        gl.uniformMatrix4fv(matrixLocation, false, uniforms);
+        
+        // Draw the geometry.
+        var primitiveType = gl.TRIANGLES;
+        var offset = 0;
+        //jumlah sisi yang digambar
+        var count = 128 * 6;
+        gl.drawArrays(primitiveType, offset, count);
       }
-      var uniforms = computeMatrix(
-        matrix,
-        viewProjectionMatrix,
-        obj[index].translation,
-        obj[index].rotation,
-        obj[index].scale);
-      
-      // Set the uniforms we just computed
-      // twgl.setUniforms(programInfo, object.uniforms);
-      gl.uniformMatrix4fv(matrixLocation, false, uniforms);
-      
-      // Draw the geometry.
-      var primitiveType = gl.TRIANGLES;
-      var offset = 0;
-      //jumlah sisi yang digambar
-      var count = 128 * 6;
-      gl.drawArrays(primitiveType, offset, count);
       obj[index] = init_child(obj[index]);
       for(var index_child=0; index_child<Object.size(obj[index].childs); index_child++){
         draw_scene_child(obj[index].childs[index_child], viewProjectionMatrix);
@@ -558,19 +745,22 @@ function main() {
   }
 
   function draw_scene_child(child, viewProjectionMatrix){
-      var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-      var zNear = 1;
-      var zFar = 2000;
-      var right = gl.canvas.clientWidth;
-      var bottom = gl.canvas.clientHeight;
+    var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    var zNear = 1;
+    var zFar = 2000;
+    var right = gl.canvas.clientWidth;
+    var bottom = gl.canvas.clientHeight;
+    //tentukan default di sini
+    var top = -bottom;
+    var left = aspect*top;
       var program = createProgramFromScripts(gl, ["vertex-shader-3d", "fragment-shader-3d"]);
       // look up where the vertex data needs to go.
-      var positionLocation = gl.getAttribLocation(program, "a_position");
+      const positionLocation = gl.getAttribLocation(program, "a_position");
       var colorLocation = gl.getAttribLocation(program, "a_color");
       // lookup uniforms
       var matrixLocation = gl.getUniformLocation(program, "u_matrix");
       // Create a buffer to put positions in
-      var positionBuffer = gl.createBuffer();
+      const positionBuffer = gl.createBuffer();
       // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       // Create a buffer to put colors in
@@ -1010,6 +1200,14 @@ function setColorsWhite(gl) {
   gl.bufferData(
       gl.ARRAY_BUFFER,
       warna,
+      gl.STATIC_DRAW);
+}
+
+// Fill the buffer with colors for the model.
+function setNormals(gl, normal_buffer) {
+  gl.bufferData(
+      gl.ARRAY_BUFFER,
+      normal_buffer,
       gl.STATIC_DRAW);
 }
 
