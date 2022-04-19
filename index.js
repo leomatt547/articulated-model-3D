@@ -4,6 +4,7 @@ let obj = Object;
 let input = Object;
 let selected_id = Number;
 let input_change = Boolean;
+let then = Number;
 
 Object.size = function(obj) {
   var size = 0,
@@ -142,6 +143,7 @@ function main() {
     viewing;
 
   function init(){
+    then = 0;
     obj = JSON.parse(isi).models;
     // gl.useProgram(program);
     fieldOfViewRadians = degToRad(90);
@@ -308,19 +310,7 @@ function main() {
 
   // Setup a ui.
   var fieldOfViewSlider = document.getElementById("fieldOfView-range");
-  var xSlider = document.getElementById("x-pos-range");
-  var ySlider = document.getElementById("y-pos-range");
-  var zSlider = document.getElementById("z-pos-range");
-  var scaleX = document.getElementById("scaleX");
-  var scaleY = document.getElementById("scaleY");
-  var scaleZ = document.getElementById("scaleZ");
   var angleX = document.getElementById("angleX");
-  var angleY = document.getElementById("angleY");
-  var angleZ = document.getElementById("angleZ");
-  var cameraAngleX = document.getElementById("cameraAngleX");
-  var cameraAngleY = document.getElementById("cameraAngleY");
-  var cameraAngleZ = document.getElementById("cameraAngleZ");
-  var cameraRadius = document.getElementById("cameraRadius");
   var shadernya = document.getElementById("shadernya");
   var reset = document.getElementById("reset-button");
   var pers = document.getElementById("perspective-button");
@@ -351,48 +341,9 @@ function main() {
   fieldOfViewSlider.oninput = function() {
       updateFieldOfView(this);
   }
-  xSlider.oninput = function() {
-      updatePosition(0, this);
-  }
-  ySlider.oninput = function() {
-      updatePosition(1, this);
-  }
-  zSlider.oninput = function() {
-      updatePosition(2, this);
-  }
-  //Scale
-  scaleX.oninput = function() {
-      updateScale(0, this);
-  }
-  scaleY.oninput = function() {
-      updateScale(1, this);
-  }
-  scaleZ.oninput = function() {
-      updateScale(2, this);
-  }
   //Rotation
   angleX.oninput = function() {
       updateRotation(0, this);
-  }
-  angleY.oninput = function() {
-      updateRotation(1, this);
-  }
-  angleZ.oninput = function() {
-      updateRotation(2, this);
-  }
-  //camera Angle
-  cameraAngleX.oninput = function() {
-      updateCameraAngle(0, this);
-  }
-  cameraAngleY.oninput = function() {
-      updateCameraAngle(1, this);
-  }
-  cameraAngleZ.oninput = function() {
-      updateCameraAngle(2, this);
-  }
-  //camera radian
-  cameraRadius.oninput = function() {
-      updateCameraRadius(this);
   }
   function reset(){
     drawScene();
@@ -401,20 +352,8 @@ function main() {
     obj[selected_id].iscolor = ui.checked;
     drawScene();
   }
-  function updateCameraAngle(index,ui) {
-    cameraAngleRadians[index] = degToRad(ui.value);
-    drawScene();
-  }
-  function updateCameraRadius(ui) {
-    camRadius = ui.value;
-    drawScene();
-  }
   function updateFieldOfView(ui) {
     fieldOfViewRadians = degToRad(ui.value);
-    drawScene();
-  }
-  function updatePosition(index, ui) {
-    obj[selected_id].translation[index] = ui.value;
     drawScene();
   }
   function updateRotation(index,ui) {
@@ -422,10 +361,6 @@ function main() {
       var angleInRadians = angleInDegrees * Math.PI / 180;
       obj[selected_id].rotation[index] = angleInRadians;
       drawScene();
-  }
-  function updateScale(index,ui) {
-    obj[selected_id].scale[index] = ui.value;
-    drawScene();
   }
   function resizeCanvasToDisplaySize(canvas, multiplier) {
     multiplier = multiplier || 1;
@@ -513,33 +448,33 @@ function main() {
         const faceInfos = [
           {
             target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-            // url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-x.jpg',
-            url: './asset/pos-x.jpg'
+            url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-x.jpg',
+            // url: './asset/pos-x.jpg'
           },
           {
             target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-            // url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-x.jpg',
-            url: './asset/neg-x.jpg'
+            url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-x.jpg',
+            // url: './asset/neg-x.jpg'
           },
           {
             target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-            // url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-y.jpg',
-            url: './asset/pos-y.jpg'
+            url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-y.jpg',
+            // url: './asset/pos-y.jpg'
           },
           {
             target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-            // url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-y.jpg',
-            url: './asset/neg-y.jpg'
+            url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-y.jpg',
+            // url: './asset/neg-y.jpg'
           },
           {
             target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-            // url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-z.jpg',
-            url: './asset/pos-z.jpg'
+            url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-z.jpg',
+            // url: './asset/pos-z.jpg'
           },
           {
             target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-            // url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-z.jpg',
-            url: './asset/neg-z.jpg'
+            url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-z.jpg',
+            // url: './asset/neg-z.jpg'
           },
         ];
         faceInfos.forEach((faceInfo) => {
@@ -558,7 +493,7 @@ function main() {
 
           // Asynchronously load an image
           const image = new Image();
-          // image.crossOrigin = "anonymous";
+          image.crossOrigin = "anonymous";
           image.src = url;
           // image.addEventListener('load', function() {
           //   // Now that the image has loaded make copy it to the texture.
@@ -574,7 +509,6 @@ function main() {
         gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
-        // requestAnimationFrame(drawSceneEnv);
         resizeCanvasToDisplaySize(gl.canvas);
 
         // Tell WebGL how to convert from clip space to pixels
@@ -583,6 +517,7 @@ function main() {
         gl.enable(gl.CULL_FACE);
         gl.enable(gl.DEPTH_TEST);
 
+      
         // Clear the canvas AND the depth buffer.
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -738,21 +673,27 @@ function main() {
         gl.drawArrays(primitiveType, offset, count);
       }
       obj[index] = init_child(obj[index]);
-      for(var index_child=0; index_child<Object.size(obj[index].childs); index_child++){
-        draw_scene_child(obj[index].childs[index_child], viewProjectionMatrix);
-      }
+      // requestAnimationFrame(drawScene);
+      draw_scene_child(obj[index], viewProjectionMatrix);
     }
   }
 
-  function draw_scene_child(child, viewProjectionMatrix){
-    var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-    var zNear = 1;
-    var zFar = 2000;
-    var right = gl.canvas.clientWidth;
-    var bottom = gl.canvas.clientHeight;
-    //tentukan default di sini
-    var top = -bottom;
-    var left = aspect*top;
+  function draw_scene_child(parent, viewProjectionMatrix){
+    // // convert to seconds
+    // time *= 0.001;
+    // // Subtract the previous time from the current time
+    // var deltaTime = time - then;
+    // // Remember the current time for the next frame.
+    // then = time;
+    for(var index_child=0; index_child<Object.size(parent.childs); index_child++){
+      var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+      var zNear = 1;
+      var zFar = 2000;
+      var right = gl.canvas.clientWidth;
+      var bottom = gl.canvas.clientHeight;
+      //tentukan default di sini
+      var top = -bottom;
+      var left = aspect*top;
       var program = createProgramFromScripts(gl, ["vertex-shader-3d", "fragment-shader-3d"]);
       // look up where the vertex data needs to go.
       const positionLocation = gl.getAttribLocation(program, "a_position");
@@ -787,7 +728,7 @@ function main() {
       gl.vertexAttribPointer(
           positionLocation, size, type, normalize, stride, offset);
       // Put geometry data into buffer
-      setGeometry(gl, child.buffer);
+      setGeometry(gl, parent.childs[index_child].buffer);
       // Turn on the color attribute
       gl.enableVertexAttribArray(colorLocation);
       // Bind the color buffer.
@@ -815,30 +756,33 @@ function main() {
           var matrix = m4.multiply(oblique, m4.orthographic(left, right, bottom, top, zNear, zFar));
           break;
       };
-
       // // Setup all the needed attributes.
-      if(child.iscolor){
-        setColors(gl, child.color);
+      if(parent.childs[index_child].iscolor){
+        setColors(gl, parent.childs[index_child].color);
       }else{
         setColorsWhite(gl);
       }
+
+      // parent.childs[index_child].rotation[0] += degToRad(0.6 * deltaTime); 
+
       var uniforms_child = computeMatrix(
         matrix,
         viewProjectionMatrix,
-        child.translation,
-        child.rotation,
-        child.scale);
-       
+        parent.childs[index_child].translation,
+        parent.childs[index_child].rotation,
+        parent.childs[index_child].scale);
+      
       // Set the uniforms we just computed
       // twgl.setUniforms(programInfo, object.uniforms);
       gl.uniformMatrix4fv(matrixLocation, false, uniforms_child);
-       
+      
       // Draw the geometry.
       var primitiveType = gl.TRIANGLES;
       var offset = 0;
       //jumlah sisi yang digambar
       var count = 128 * 6;
       gl.drawArrays(primitiveType, offset, count);
+    }
   }
 }
 
