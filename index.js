@@ -343,7 +343,7 @@ function main() {
   }
   //Rotation
   angleX.oninput = function() {
-      updateRotation(0, this);
+    updateRotation(0, this);
   }
   function reset(){
     drawScene();
@@ -359,7 +359,19 @@ function main() {
   function updateRotation(index,ui) {
       var angleInDegrees = (parseInt(ui.value));
       var angleInRadians = angleInDegrees * Math.PI / 180;
-      obj[selected_id].rotation[index] = angleInRadians;
+      for(var iter=0; iter<Object.size(obj[selected_id].childs); iter++){
+        // console.log(obj[selected_id].nama);
+        if(obj[selected_id].nama == "cube 1"){
+          if(iter % 2 == 0){
+            obj[selected_id].childs[iter].rotation[index] = angleInRadians;
+          }else{
+            obj[selected_id].childs[iter].rotation[index] = -angleInRadians;
+          }
+        }
+        else{
+          obj[selected_id].childs[iter].rotation[index] = angleInRadians;
+        }
+      }
       drawScene();
   }
   function resizeCanvasToDisplaySize(canvas, multiplier) {
