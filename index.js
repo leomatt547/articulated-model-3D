@@ -161,16 +161,16 @@ function main() {
         obj[index].normal = new Float32Array(obj[index].normal);
       }
       obj[index].scale  = [1,1,1];
-      // console.log(obj[index].rotation)
-      if(obj[index].rotation == undefined){
-        obj[index].rotation = [degToRad(0),degToRad(0),degToRad(0)];
-      }else{
-        obj[index].rotation = [degToRad(obj[index].rotation[0]),degToRad(obj[index].rotation[1]),degToRad(obj[index].rotation[2])];
-      }
+      obj[index].rotation =  new Array(obj[index].rotation);
+      console.log(obj[index].rotation)
+      // console.log("Index ke " + index);
+      // obj[index].rotation = [degToRad(0),degToRad(0),degToRad(0)];
+      // if(obj[index].rotation != undefined){
+      //   obj[index].rotation = [degToRad(obj[index].rotation[0]),degToRad(obj[index].rotation[1]),degToRad(obj[index].rotation[2])];
+      //   // console.log(obj[index].rotation)
+      // }
       obj[index].rotation = [degToRad(0),degToRad(0),degToRad(0)];
-      obj[index].iscolor = false;
-      // console.log(obj[index].childs);
-      // console.log(Object.size(obj[index].childs));
+      obj[index].iscolor = true;
     }
   }
 
@@ -425,7 +425,7 @@ function main() {
     //ITERASI 3 object kelompok
     for(var index=0; index<Object.size(obj); index++){
       // ENVIRONTMENT MAPS
-      if(obj[index].normal != undefined){
+      if(obj[index].normal != undefined && obj[index].iscolor){
         // setup GLSL program
         const program = createProgramFromScripts(gl, ["vertex-shader-3d-env", "fragment-shader-3d-env"]);
         // look up where the vertex data needs to go.
@@ -568,8 +568,13 @@ function main() {
 
         // Compute the projection matrix
         const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-        const projectionMatrix =
-            m4.perspective(fieldOfViewRadians, aspect, 1, 2000);
+        const projectionMatrix = m4.perspective(fieldOfViewRadians, aspect, 1, 2000);
+        // var uniforms = computeMatrix(
+        //       projectionMatrix,
+        //       viewProjectionMatrix,
+        //       obj[index].translation,
+        //       obj[index].rotation,
+        //       obj[index].scale);
         gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
 
         const cameraPosition = [0, 0, 2];
@@ -660,12 +665,12 @@ function main() {
             break;
         };
 
-        // // Setup all the needed attributes.
-        if(obj[index].iscolor){
-          setColors(gl, obj[index].color);
-        }else{
-          setColorsWhite(gl);
-        }
+        // // // Setup all the needed attributes.
+        // if(obj[index].iscolor){
+        //   setColors(gl, obj[index].color);
+        // }else{
+        //   setColorsWhite(gl);
+        // }
         var uniforms = computeMatrix(
           matrix,
           viewProjectionMatrix,
