@@ -180,12 +180,21 @@ async function main() {
 
     const balok2 = makeCube(1, shaderProgram, gl)
     balok2.setAnchorPoint(balok.getPoint(0), 3)
-    balok2.setPosition(0,0,0)
+    balok2.setPosition(110,0,0)
     balok2.setRotation(0,0,0)
     balok2.setScale(1,1,1)
     balok2.set_env_shader(envShaderProgram)
     balok2.setWireShader(wireShaderProgram)
     balok2.bind() 
+
+    const balok3 = makeCube(2, shaderProgram, gl)
+    balok3.setAnchorPoint(balok.getPoint(0), 3)
+    balok3.setPosition(375,100,100)
+    balok3.setRotation(0,0,0)
+    balok3.setScale(1,1,1)
+    balok3.set_env_shader(envShaderProgram)
+    // balok3.setWireShader(wireShaderProgram)
+    balok3.bind() 
 
 
     // const pyramid1 = makePyramid(1, shaderProgram, gl)
@@ -197,6 +206,7 @@ async function main() {
     // pyramid1.bind()
 
     balok.addChild(balok2)
+    balok.addChild(balok3)
 
     canvas.addEventListener('ui-rotate', (e: CustomEvent) => {
         console.log('ui-rotate event')
@@ -218,10 +228,12 @@ async function main() {
             case 4:
                 // balok.setRotation(appState.rotation, appState.rotation, appState.rotation)
                 balok2.setRotationSpecific(appState.rotation, appState.rotation, appState.rotation)
+                balok3.setRotationSpecific(-appState.rotation, appState.rotation, -appState.rotation)
                 break;
             case 5:
                 balok.setFieldOfView(appState.rotation)
                 balok2.setFieldOfView(appState.rotation)
+                balok3.setFieldOfView(appState.rotation)
                 // balok2.setScale(1-appState.rotation/180, 1-appState.rotation/180, 1-appState.rotation/180)
                 break;
         

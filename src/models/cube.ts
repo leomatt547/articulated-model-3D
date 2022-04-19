@@ -1,19 +1,21 @@
 import GLObject from '../GLObject'
 
 function makeCube(id: number, shader: WebGLProgram, gl: WebGL2RenderingContext) {
-  const baseVal = 100
+  const baseVal = 50
+  const baseValHeight = 150
+  const baseValWidth = -50
   const points = [
     //bottom vertices
-    0,0,0,
-    baseVal,0,0,
-    baseVal,0,baseVal,
-    0,0,baseVal,
+    baseValWidth,-baseValHeight,baseValWidth,
+    baseVal,-baseValHeight,baseValWidth,
+    baseVal,-baseValHeight,baseVal,
+    baseValWidth,-baseValHeight,baseVal,
 
     //top vertcies
-    0,baseVal+100,0,
-    baseVal,baseVal+100,0,
-    baseVal,baseVal+100,baseVal,
-    0,baseVal+100,baseVal,
+    baseValWidth,baseValHeight,baseValWidth,
+    baseVal,baseValHeight,baseValWidth,
+    baseVal,baseValHeight,baseVal,
+    baseValWidth,baseValHeight,baseVal,
   ]
 
   const indices = [

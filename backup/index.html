@@ -1,0 +1,241 @@
+<html>
+  <head>
+    <title>Hollow Objects Kel 3</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <div class="flex">
+      <div class="sidebar">
+        <span>File Model: </span>
+        <div class="action">
+          <input type="file" id="load-button" name="load-button" />
+        </div>
+        <br />
+        <label for="switch">Shader<span id="cameraRadius-val"></span></label>
+        <label class="switch">
+          <input type="checkbox" id="shadernya" />
+          <span class="saklar"></span>
+        </label>
+
+        <div class="position">
+          <label for="">X Position : <span id="x-pos-val"></span></label>
+          <input
+            type="range"
+            class="slider"
+            name=""
+            min="-1000"
+            max="1000"
+            value="0"
+            id="x-pos-range"
+          />
+          <label for="">Y Position : <span id="y-pos-val"></span></label>
+          <input
+            type="range"
+            class="slider"
+            name=""
+            min="-1000"
+            max="1000"
+            value="0"
+            id="y-pos-range"
+          />
+          <label for="">Z Position : <span id="z-pos-val"></span></label>
+          <input
+            type="range"
+            class="slider"
+            name=""
+            min="-1000"
+            max="1000"
+            value="0"
+            id="z-pos-range"
+          />
+        </div>
+
+        <div class="scale">
+          <label for="">X Scale : <span id="scaleX-val"></span></label>
+          <input
+            type="range"
+            class="slider"
+            name=""
+            min="-5"
+            max="5"
+            step="0.01"
+            value="1"
+            id="scaleX"
+          />
+          <label for="">Y Scale : <span id="scaleY-val"></span></label>
+          <input
+            type="range"
+            class="slider"
+            name=""
+            min="-5"
+            max="5"
+            step="0.01"
+            value="1"
+            id="scaleY"
+          />
+          <label for="">Z Scale : <span id="scaleZ-val"></span></label>
+          <input
+            type="range"
+            class="slider"
+            name=""
+            min="-5"
+            max="5"
+            step="0.01"
+            value="1"
+            id="scaleZ"
+          />
+        </div>
+
+        <div class="rotation">
+          <label for="">X Rotation : <span id="angleX-val"></span></label>
+          <input
+            type="range"
+            class="slider"
+            name=""
+            min="-360"
+            max="360"
+            step="0.01"
+            value="0"
+            id="angleX"
+          />
+          <label for="">Y Rotation : <span id="angleY-val"></span></label>
+          <input
+            type="range"
+            class="slider"
+            name=""
+            max="360"
+            min="-360"
+            step="0.01"
+            value="0"
+            id="angleY"
+          />
+          <label for="">Z Rotation : <span id="angleZ-val"></span></label>
+          <input
+            type="range"
+            class="slider"
+            name=""
+            max="360"
+            min="-360"
+            step="0.01"
+            value="0"
+            id="angleZ"
+          />
+        </div>
+        <div class="camera-angle">
+          <label for=""
+            >Camera X Rotation : <span id="cameraAngleX-val"></span
+          ></label>
+          <input
+            type="range"
+            class="slider"
+            name=""
+            min="-360"
+            max="360"
+            step="0.01"
+            value="-45"
+            id="cameraAngleX"
+          />
+          <label for=""
+            >Camera Y Rotation : <span id="cameraAngleY-val"></span
+          ></label>
+          <input
+            type="range"
+            class="slider"
+            name=""
+            max="360"
+            min="-360"
+            step="0.01"
+            value="135"
+            id="cameraAngleY"
+          />
+          <label for=""
+            >Camera Z Rotation : <span id="cameraAngleZ-val"></span
+          ></label>
+          <input
+            type="range"
+            class="slider"
+            name=""
+            max="360"
+            min="-360"
+            step="0.01"
+            value="90"
+            id="cameraAngleZ"
+          />
+        </div>
+
+        <label for=""
+          >Camera Radius : <span id="cameraRadius-val"></span
+        ></label>
+        <input
+          type="range"
+          class="slider"
+          name=""
+          min="100"
+          max="1000"
+          value="600"
+          id="cameraRadius"
+        />
+        <label for="">Field of View : <span id="fieldOfView-val"></span></label>
+        <input
+          type="range"
+          class="slider"
+          name=""
+          min="1"
+          max="179"
+          value="1.0472"
+          id="fieldOfView-range"
+        />
+      </div>
+      <canvas id="content"></canvas>
+    </div>
+
+    <div class="menu-button">
+      <button id="reset-button">RESET</button>
+      <button id="perspective-button">Perspective</button>
+      <button id="ortho-button">Orthographic</button>
+      <button id="oblique-button">Oblique</button>
+      <a href="help.html"><button id="help-button">HELP</button></a>
+      <br />
+      <div>
+        <span id="result">Selected Model: </span>
+        <div class="dropdown">
+          <div class="title pointerCursor">
+            Pilih Modelnya <i class="fa fa-angle-right"></i>
+          </div>
+          <div class="menu pointerCursor hide"></div>
+        </div>
+      </div>
+    </div>
+    <!-- vertex shader -->
+    <script id="vertex-shader-3d" type="x-shader/x-vertex">
+      attribute vec4 a_position;
+      attribute vec4 a_color;
+
+      uniform mat4 u_matrix;
+
+      varying vec4 v_color;
+
+      void main() {
+        // Multiply the position by the matrix.
+        gl_Position = u_matrix * a_position;
+
+        // Pass the color to the fragment shader.
+        v_color = a_color;
+      }
+    </script>
+    <!-- vertex shader -->
+    <script id="fragment-shader-3d" type="x-shader/x-fragment">
+      precision mediump float;
+
+      // Passed in from the vertex shader.
+      varying vec4 v_color;
+
+      void main() {
+         gl_FragColor = v_color;
+      }
+    </script>
+    <pre id="output" style="font-size: 0%"></pre>
+    <script src="helper.js"></script>
+    <script src="index.js"></script>
+  </body>
+</html>

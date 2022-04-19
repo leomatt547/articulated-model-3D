@@ -1,5 +1,5 @@
 import { multiplyMatrix,inverse } from './utils/matrix'
-import { lookAt,perspective,xRotation,yRotate } from './utils/m4'
+import { lookAt,perspective,xRotation,translate, xRotate, yRotate, zRotate, scale } from './utils/m4'
 
 function cos_sine(rad) {
     const deg = rad * Math.PI / 180;
@@ -113,7 +113,7 @@ class GLObject {
     }
 
     setRotationSpecific(x: number, y: number, z: number) {
-        this.rot3 = [0,45,z];
+        this.rot3 = [0,-45,z];
         this.projectionMat = this.calcProjectionMatrix()
     }
 
@@ -206,6 +206,17 @@ class GLObject {
             0, 1, 0,
             u+a, v+b, 1
         ] */
+        // var aspect = this.gl.canvas.clientWidth / this.gl.canvas.clientHeight
+        // var near = 1;
+        // var far = 2000;
+        // var f = Math.tan(Math.PI * 0.5 - 0.5 * this.degToRad(this.FieldOfView));
+        // var rangeInv = 1.0 / (near - far);
+        // const perspectiveMat = [
+        //     f / aspect, 0, 0, 0,
+        //     0, f, 0, 0,
+        //     0, 0, (near + far) * rangeInv, -1,
+        //     0, 0, near * far * rangeInv * 2, 0
+        // ]
         const [u,v,w] = this.pos
         const translateMat3 = [
             1,  0,  0,  0,
@@ -408,20 +419,12 @@ class GLObject {
         var uniformCol = gl.getUniformLocation(this.shader, 'u_fragColor')
         var uniformPos = gl.getUniformLocation(this.shader, 'u_proj_mat')
         var uniformRes = gl.getUniformLocation(this.shader, 'u_resolution')
-
-        // lookup uniforms
-        var projectionLocation = gl.getUniformLocation(this.env_shader, "u_projection");
-        var viewLocation = gl.getUniformLocation(this.env_shader, "u_view");
-        var worldLocation = gl.getUniformLocation(this.env_shader, "u_world");
-        var worldCameraPositionLocation = gl.getUniformLocation(this.env_shader, "u_worldCameraPosition");
-        
-        var fieldOfViewRadians = this.degToRad(this.FieldOfView);
         
         gl.enableVertexAttribArray(vertexPos)
         gl.vertexAttribPointer(vertexPos, 3, gl.FLOAT, false, 0, 0)
         // console.log(this.projectionMat)
         gl.uniformMatrix4fv(uniformPos, false, this.projectionMat)
-        gl.uniform4fv(uniformCol, [0.5, 1.0, 0.5, 1.0])
+        gl.uniform4fv(uniformCol, [0.0, 1.0, 1.0, 1.0])
         gl.uniform3fv(uniformRes, [gl.canvas.width, gl.canvas.height, this.sceneDepth])
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.vboIndices)
@@ -442,28 +445,6 @@ class GLObject {
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.wireBuffer)
             gl.drawElements(gl.LINES, this.wireIndices.length, gl.UNSIGNED_SHORT, 0)
         } 
-
-        var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-        var projectionMatrix = perspective(fieldOfViewRadians, aspect, 1, 2000);
-        gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
-
-        var cameraPosition = [0, 0, 2];
-        var target = [0, 0, 0];
-        var up = [0, 1, 0];
-        // Compute the camera's matrix using look at.
-        var cameraMatrix = lookAt(cameraPosition, target, up);
-
-        // Make a view matrix from the camera matrix.
-        var viewMatrix = inverse(cameraMatrix);
-
-        var worldMatrix = xRotation(this.degToRad(this.rot3[0]));
-        worldMatrix = yRotate(worldMatrix, this.degToRad(this.rot3[1]));
-
-        // Set the uniforms
-        gl.uniformMatrix4fv(projectionLocation, false, projectionMatrix);
-        gl.uniformMatrix4fv(viewLocation, false, viewMatrix);
-        gl.uniformMatrix4fv(worldLocation, false, worldMatrix);
-        gl.uniform3fv(worldCameraPositionLocation, cameraPosition);
 
         const proj = this.calcProjectionMatrix()
         // if (this.id === 0)
