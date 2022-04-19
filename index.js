@@ -348,6 +348,12 @@ function main() {
   angleX.oninput = function() {
     updateRotation(0, this);
   }
+  angleY.oninput = function() {
+    updateRotationY(1, this);
+  }
+  angleZ.oninput = function() {
+    updateRotationZ(2, this);
+  }
   function reset(){
     drawScene();
   }
@@ -357,6 +363,24 @@ function main() {
   }
   function updateFieldOfView(ui) {
     fieldOfViewRadians = degToRad(ui.value);
+    drawScene();
+  }
+  function updateRotationY(index,ui) {
+    var angleInDegrees = (parseInt(ui.value));
+    var angleInRadians = angleInDegrees * Math.PI / 180;
+    for(var iter=0; iter<Object.size(obj[selected_id].childs); iter++){
+      // console.log(obj[selected_id].nama);
+      if(obj[selected_id].nama == "cube 1"){
+        if(iter % 2 == 0){
+          obj[selected_id].childs[iter].rotation[index] = angleInRadians;
+        }else{
+          obj[selected_id].childs[iter].rotation[index] = -angleInRadians;
+        }
+      }
+      else{
+        obj[selected_id].childs[iter].rotation[index] = angleInRadians;
+      }
+    }
     drawScene();
   }
   function updateRotation(index,ui) {
@@ -371,11 +395,39 @@ function main() {
             obj[selected_id].childs[iter].rotation[index] = -angleInRadians;
           }
         }
-        else{
-          obj[selected_id].childs[iter].rotation[index] = angleInRadians;
+        else if(obj[selected_id].nama == "cube 2"){
+          if(iter == 0 || iter == 1)
+          {
+            obj[selected_id].childs[iter].rotation[index] = angleInRadians;
+          }
+          else if(iter == 2){
+            obj[selected_id].childs[iter].rotation[2] = -angleInRadians;
+          }
+          else
+          {
+            obj[selected_id].childs[iter].rotation[2] = angleInRadians;
+          }
         }
       }
       drawScene();
+  }
+  function updateRotationZ(index,ui) {
+    var angleInDegrees = (parseInt(ui.value));
+    var angleInRadians = angleInDegrees * Math.PI / 180;
+    for(var iter=0; iter<Object.size(obj[selected_id].childs); iter++){
+      // console.log(obj[selected_id].nama);
+      if(obj[selected_id].nama == "cube 1"){
+        if(iter % 2 == 0){
+          obj[selected_id].childs[iter].rotation[index] = angleInRadians;
+        }else{
+          obj[selected_id].childs[iter].rotation[index] = -angleInRadians;
+        }
+      }
+      else{
+        obj[selected_id].childs[iter].rotation[index] = angleInRadians;
+      }
+    }
+    drawScene();
   }
   function resizeCanvasToDisplaySize(canvas, multiplier) {
     multiplier = multiplier || 1;
