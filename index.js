@@ -1,6 +1,7 @@
 "use strict";
 let MatType = Float32Array;
 let obj = Object;
+let angle = Number;
 let input = Object;
 let selected_id = Number;
 let input_change = Boolean;
@@ -54,6 +55,7 @@ function main() {
 
   obj = input.models;
   selected_id = 0;
+  angle = 0;
 
   var fieldOfViewRadians, 
     cameraAngleRadians , 
@@ -237,6 +239,23 @@ function main() {
   shadernya.oninput = function(){
     updateColor(this);
   }
+  animationnya.oninput = function(){
+    if(this.checked){
+      setInterval(updateRotation(0, this), 1);
+    };
+    // while(this.checked){
+    //   setInterval(updateRotation(0, this), 1);
+    //   if(!this.checked){
+    //     break;
+    //   }
+    // }
+  }
+  // function updateRotationController(nyala){
+  //   while(true){
+  //     setInterval(updateRotation(0, this), 1);
+  //     if()
+  //   }
+  // }
   fieldOfViewSlider.oninput = function() {
       updateFieldOfView(this);
   }
@@ -257,6 +276,9 @@ function main() {
   }
   function updateRotation(index,ui) {
       var angleInDegrees = (parseInt(ui.value));
+      // console.log(angle);
+      // angle = angle + 0.01;
+      // var angleInDegrees = angle; 
       var angleInRadians = angleInDegrees * Math.PI / 180;
       for(var iter=0; iter<Object.size(obj[selected_id].childs); iter++){
         // console.log(obj[selected_id].nama);
