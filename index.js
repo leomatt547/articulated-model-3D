@@ -160,6 +160,9 @@ function main() {
       if(obj[index].normal != undefined){
         obj[index].normal = new Float32Array(obj[index].normal);
       }
+      if(obj[index].buffer_env != undefined){
+        obj[index].buffer_env = new Float32Array(obj[index].buffer_env);
+      }
       obj[index].scale  = [1,1,1];
       obj[index].rotation =  new Array(obj[index].rotation);
       console.log(obj[index].rotation)
@@ -444,7 +447,7 @@ function main() {
         // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
         // Put the positions in the buffer
-        setGeometry(gl, obj[index].buffer);
+        setGeometry(gl, obj[index].buffer_env);
 
         // Create a buffer to put normals in
         const normalBuffer = gl.createBuffer();
@@ -586,7 +589,7 @@ function main() {
         // Make a view matrix from the camera matrix.
         const viewMatrix = m4.inverse(cameraMatrix);
 
-        var worldMatrix = m4.xRotation(obj[index].rotation[0]);
+        var worldMatrix = m4.xRotation(obj[index].rotation[0]+degToRad(25));
         worldMatrix = m4.yRotate(worldMatrix, obj[index].rotation[1]);
 
         // Set the uniforms
@@ -666,11 +669,12 @@ function main() {
         };
 
         // // // Setup all the needed attributes.
-        // if(obj[index].iscolor){
-        //   setColors(gl, obj[index].color);
+        if(!obj[index].iscolor){
+          setColors(gl, obj[index].color);
+        }
         // }else{
-        //   setColorsWhite(gl);
-        // }
+        // //   setColorsWhite(gl);
+        // // }
         var uniforms = computeMatrix(
           matrix,
           viewProjectionMatrix,
