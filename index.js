@@ -15,65 +15,6 @@ Object.size = function(obj) {
   return size;
 };
 
-//Selected Button
-function toggleClass(elem,className){
-  if (elem.className.indexOf(className) !== -1){
-    elem.className = elem.className.replace(className,'');
-  }
-  else{
-    elem.className = elem.className.replace(/\s+/g,' ') + 	' ' + className;
-  }
-
-  return elem;
-}
-
-function toggleDisplay(elem){
-  const curDisplayStyle = elem.style.display;			
-
-  if (curDisplayStyle === 'none' || curDisplayStyle === ''){
-    elem.style.display = 'block';
-  }
-  else{
-    elem.style.display = 'none';
-  }
-
-}
-
-function toggleMenuDisplay(e){
-  const dropdown = e.currentTarget.parentNode;
-  const menu = dropdown.querySelector('.menu');
-  const icon = dropdown.querySelector('.fa-angle-right');
-
-  toggleClass(menu,'hide');
-  toggleClass(icon,'rotate-90');
-}
-
-function handleOptionSelected(e){
-  toggleClass(e.target.parentNode, 'hide');			
-
-  const id = e.target.id;
-  const newValue = e.target.textContent + ' ';
-  const titleElem = document.querySelector('.dropdown .title');
-  const icon = document.querySelector('.dropdown .title .fa');
-
-
-  titleElem.textContent = newValue;
-  titleElem.appendChild(icon);
-
-  //trigger custom event
-  document.querySelector('.dropdown .title').dispatchEvent(new Event('change'));
-    //setTimeout is used so transition is properly shown
-  setTimeout(() => toggleClass(icon,'rotate-90',0));
-}
-
-function handleTitleChange(e){
-  const result = document.getElementById('result');
-
-  result.innerHTML = 'Selected Model : ' + e.target.textContent;
-  selected_id = parseInt(e.target.textContent);
-}
-
-
 //load button
 document.getElementById('load-button')
   .addEventListener('change', function() {
@@ -113,34 +54,11 @@ function main() {
 
   obj = input.models;
   selected_id = 0;
-  console.log(Object.size(obj));
-
-  var element = document.getElementsByClassName("menu pointerCursor hide");
-  element[0].innerHTML = "";
-
-  for(var index=0; index<Object.size(obj); index++){
-    var div = document.createElement("div");
-    div.className = "option";
-    div.innerHTML = index;
-    element[0].appendChild(div);
-  }
-  
-  //get elements
-  const dropdownTitle = document.querySelector('.dropdown .title');
-  const dropdownOptions = document.querySelectorAll('.dropdown .option');
-      
-  //bind listeners to these elements
-  dropdownTitle.addEventListener('click', toggleMenuDisplay);
-      
-  dropdownOptions.forEach(option => option.addEventListener('click',handleOptionSelected));
-      
-  document.querySelector('.dropdown .title').addEventListener('change',handleTitleChange);
 
   var fieldOfViewRadians, 
     cameraAngleRadians , 
     radiusnya, 
-    camRadius, 
-    viewing;
+    camRadius
 
   function init(){
     then = 0;
@@ -150,7 +68,6 @@ function main() {
     cameraAngleRadians = [degToRad(0),degToRad(0),degToRad(0)];
     radiusnya = 0;
     camRadius = 600;
-    viewing = 0; //0: Perspective, 1: Orto, 2: Oblique
     //untuk setiap model
     for(var index=0; index<Object.size(obj); index++){
       obj[index].buffer = new Float32Array(obj[index].buffer);
@@ -298,14 +215,7 @@ function main() {
     matrix = m4.xRotate(matrix, rotation[0]);
     matrix = m4.yRotate(matrix, rotation[1]);
     matrix = m4.zRotate(matrix, rotation[2]);
-    switch(viewing){
-      case 0:
-        matrix = m4.scale(matrix, scale[0], scale[1], scale[2]);
-        break;
-      default :
-        matrix = m4.scale(matrix, -scale[0], -scale[1], -scale[2]);
-        break;
-    };
+    matrix = m4.scale(matrix, scale[0], scale[1], scale[2]);
     return matrix;
   }
 
@@ -315,27 +225,13 @@ function main() {
   var fieldOfViewSlider = document.getElementById("fieldOfView-range");
   var angleX = document.getElementById("angleX");
   var shadernya = document.getElementById("shadernya");
+  var animationnya = document.getElementById("animationnya");
   var reset = document.getElementById("reset-button");
-  var pers = document.getElementById("perspective-button");
-  var ortho = document.getElementById("ortho-button");
-  var oblique = document.getElementById("oblique-button");
   
   //Inisialisasi
   fieldOfViewSlider.value = fieldOfViewRadians;
   reset.onclick = function(){
     init();
-    drawScene()
-  }
-  pers.onclick = function(){
-    viewing = 0;
-    drawScene()
-  }
-  ortho.onclick = function(){
-    viewing = 1;
-    drawScene()
-  }
-  oblique.onclick = function(){
-    viewing = 2;
     drawScene()
   }
   shadernya.oninput = function(){
@@ -414,18 +310,7 @@ function main() {
     //tentukan default di sini
     var top = -bottom;
     var left = aspect*top;
-    switch(viewing){
-      case 0:
-        var projectionMatrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
-        break;
-      case 1:
-        var projectionMatrix = m4.orthographic(left, right, bottom, top, zNear, zFar);
-        break;
-      case 2:
-        var oblique = m4.oblique(-45, -45);
-        var projectionMatrix = m4.multiply(oblique, m4.orthographic(left, right, bottom, top, zNear, zFar));
-        break;
-    };
+    var projectionMatrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
     var cameraMatrix = m4.xRotation(cameraAngleRadians[0]);
     cameraMatrix = m4.yRotate(cameraMatrix, cameraAngleRadians[1]);
     cameraMatrix = m4.zRotate(cameraMatrix, cameraAngleRadians[2]);
@@ -476,32 +361,89 @@ function main() {
             {
               target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
               url: 'https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg',
-              // url: './asset/pos-x.jpg'
+              // url: './asset/pos-x.jpg',
+              width: 512,
+              height:512
             },
             {
               target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
               url: 'https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg',
-              // url: './asset/neg-x.jpg'
+              // url: './asset/neg-x.jpg',
+              width: 512,
+              height:512
             },
             {
               target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
               url: 'https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg',
-              // url: './asset/pos-y.jpg'
+              // url: './asset/pos-y.jpg',
+              width: 512,
+              height:512
             },
             {
               target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
               url: 'https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg',
-              // url: './asset/neg-y.jpg'
+              // url: './asset/neg-y.jpg',
+              width: 512,
+              height:512
             },
             {
               target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
               url: 'https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg',
-              // url: './asset/pos-z.jpg'
+              // url: './asset/pos-z.jpg',
+              width: 512,
+              height:512
             },
             {
               target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
               url: 'https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg',
-              // url: './asset/neg-z.jpg'
+              // url: './asset/neg-z.jpg',
+              width: 512,
+              height:512
+            },
+          ];
+        }else if(obj[index].nama == "cube 3"){
+          faceInfos = [
+            {
+              target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+              // url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
+              url: './asset/bump_normal.png',
+              width: 1000,
+              height:1000
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+              // url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
+              url: 'asset/bump_normal.png',
+              width: 1000,
+              height:1000
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+              // url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
+              url: 'asset/bump_normal.png',
+              width: 1000,
+              height:1000
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+              // url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
+              url: 'asset/bump_normal.png',
+              width: 1000,
+              height:1000
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+              // url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
+              url: 'asset/bump_normal.png',
+              width: 1000,
+              height:1000
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+              // url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
+              url: 'asset/bump_normal.png',
+              width: 1000,
+              height:1000
             },
           ];
         }else{
@@ -509,43 +451,53 @@ function main() {
             {
               target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
               url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-x.jpg',
-              // url: './asset/pos-x.jpg'
+              // url: './asset/pos-x.jpg',
+              width: 512,
+              height:512
             },
             {
               target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
               url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-x.jpg',
-              // url: './asset/neg-x.jpg'
+              // url: './asset/neg-x.jpg',
+              width: 512,
+              height:512
             },
             {
               target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
               url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-y.jpg',
-              // url: './asset/pos-y.jpg'
+              // url: './asset/pos-y.jpg',
+              width: 512,
+              height:512
             },
             {
               target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
               url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-y.jpg',
-              // url: './asset/neg-y.jpg'
+              // url: './asset/neg-y.jpg',
+              width: 512,
+              height:512
             },
             {
               target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
               url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-z.jpg',
-              // url: './asset/pos-z.jpg'
+              // url: './asset/pos-z.jpg',
+              width: 512,
+              height:512
             },
             {
               target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
               url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-z.jpg',
-              // url: './asset/neg-z.jpg'
+              // url: './asset/neg-z.jpg',
+              width: 512,
+              height:512
             },
           ];
         }
         faceInfos.forEach((faceInfo) => {
-          const {target, url} = faceInfo;
+          const {target, url, width, height} = faceInfo;
 
           // Upload the canvas to the cubemap face.
           const level = 0;
           const internalFormat = gl.RGBA;
-          const width = 512;
-          const height = 512;
           const format = gl.RGBA;
           const type = gl.UNSIGNED_BYTE;
 
@@ -579,8 +531,8 @@ function main() {
         gl.enable(gl.DEPTH_TEST);
 
       
-        // Clear the canvas AND the depth buffer.
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        // // Clear the canvas AND the depth buffer.
+        // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         // Tell it to use our program (pair of shaders)
         gl.useProgram(program);
@@ -701,18 +653,7 @@ function main() {
         // Set the matrix.
         // Compute the matrices for each object.
         // ------ Draw the objects --------
-        switch(viewing){
-          case 0:
-            var matrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
-            break;
-          case 1:
-            var matrix = m4.orthographic(left, right, bottom, top, zNear, zFar);
-            break;
-          case 2:
-            var oblique = m4.oblique(-45, -45);
-            var matrix = m4.multiply(oblique, m4.orthographic(left, right, bottom, top, zNear, zFar));
-            break;
-        };
+        var matrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
 
         // // // Setup all the needed attributes.
         if(!obj[index].iscolor){
@@ -813,18 +754,7 @@ function main() {
       // Set the matrix.
       // Compute the matrices for each object.
       // ------ Draw the objects --------
-      switch(viewing){
-        case 0:
-          var matrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
-          break;
-        case 1:
-          var matrix = m4.orthographic(left, right, bottom, top, zNear, zFar);
-          break;
-        case 2:
-          var oblique = m4.oblique(-45, -45);
-          var matrix = m4.multiply(oblique, m4.orthographic(left, right, bottom, top, zNear, zFar));
-          break;
-      };
+      var matrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
       // // Setup all the needed attributes.
       if(parent.childs[index_child].iscolor){
         setColors(gl, parent.childs[index_child].color);
@@ -866,28 +796,6 @@ var m4 = {
       0, f, 0, 0,
       0, 0, (near + far) * rangeInv, -1,
       0, 0, near * far * rangeInv * 2, 0
-    ];
-  },
-
-  orthographic: function(left, right, bottom, top, near, far) {
-    return [
-      2 / (right - left), 0, 0, 0,
-      0, 2 / (top - bottom), 0, 0,
-      0, 0, 2 / (near - far), 0,
-      (left + right) / (left - right), (bottom + top) / (bottom - top), (near + far) / (near - far), 1
-    ];
-  },
-
-  oblique: function(theta, phi){
-    var t = degToRad(theta);
-    var p = degToRad(phi);
-    var cotT = -1/Math.tan(t);
-    var cotP = -1/Math.tan(p);
-    return [
-      1, 0, 0, 0, 
-      0, 1, 0, 0, 
-      cotT, cotP, 1, 0,  
-      0, 0, 0, 1
     ];
   },
 
