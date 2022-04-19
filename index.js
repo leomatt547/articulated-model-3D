@@ -348,12 +348,6 @@ function main() {
   angleX.oninput = function() {
     updateRotation(0, this);
   }
-  angleY.oninput = function() {
-    updateRotationY(1, this);
-  }
-  angleZ.oninput = function() {
-    updateRotationZ(2, this);
-  }
   function reset(){
     drawScene();
   }
@@ -363,24 +357,6 @@ function main() {
   }
   function updateFieldOfView(ui) {
     fieldOfViewRadians = degToRad(ui.value);
-    drawScene();
-  }
-  function updateRotationY(index,ui) {
-    var angleInDegrees = (parseInt(ui.value));
-    var angleInRadians = angleInDegrees * Math.PI / 180;
-    for(var iter=0; iter<Object.size(obj[selected_id].childs); iter++){
-      // console.log(obj[selected_id].nama);
-      if(obj[selected_id].nama == "cube 1"){
-        if(iter % 2 == 0){
-          obj[selected_id].childs[iter].rotation[index] = angleInRadians;
-        }else{
-          obj[selected_id].childs[iter].rotation[index] = -angleInRadians;
-        }
-      }
-      else{
-        obj[selected_id].childs[iter].rotation[index] = angleInRadians;
-      }
-    }
     drawScene();
   }
   function updateRotation(index,ui) {
@@ -410,24 +386,6 @@ function main() {
         }
       }
       drawScene();
-  }
-  function updateRotationZ(index,ui) {
-    var angleInDegrees = (parseInt(ui.value));
-    var angleInRadians = angleInDegrees * Math.PI / 180;
-    for(var iter=0; iter<Object.size(obj[selected_id].childs); iter++){
-      // console.log(obj[selected_id].nama);
-      if(obj[selected_id].nama == "cube 1"){
-        if(iter % 2 == 0){
-          obj[selected_id].childs[iter].rotation[index] = angleInRadians;
-        }else{
-          obj[selected_id].childs[iter].rotation[index] = -angleInRadians;
-        }
-      }
-      else{
-        obj[selected_id].childs[iter].rotation[index] = angleInRadians;
-      }
-    }
-    drawScene();
   }
   function resizeCanvasToDisplaySize(canvas, multiplier) {
     multiplier = multiplier || 1;
@@ -512,38 +470,74 @@ function main() {
         const texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
 
-        const faceInfos = [
-          {
-            target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-            url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-x.jpg',
-            // url: './asset/pos-x.jpg'
-          },
-          {
-            target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-            url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-x.jpg',
-            // url: './asset/neg-x.jpg'
-          },
-          {
-            target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-            url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-y.jpg',
-            // url: './asset/pos-y.jpg'
-          },
-          {
-            target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-            url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-y.jpg',
-            // url: './asset/neg-y.jpg'
-          },
-          {
-            target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-            url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-z.jpg',
-            // url: './asset/pos-z.jpg'
-          },
-          {
-            target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-            url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-z.jpg',
-            // url: './asset/neg-z.jpg'
-          },
-        ];
+        var faceInfos = []
+        if(obj[index].nama == "cube 2"){
+          faceInfos = [
+            {
+              target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+              url: 'https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg',
+              // url: './asset/pos-x.jpg'
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+              url: 'https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg',
+              // url: './asset/neg-x.jpg'
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+              url: 'https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg',
+              // url: './asset/pos-y.jpg'
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+              url: 'https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg',
+              // url: './asset/neg-y.jpg'
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+              url: 'https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg',
+              // url: './asset/pos-z.jpg'
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+              url: 'https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg',
+              // url: './asset/neg-z.jpg'
+            },
+          ];
+        }else{
+          faceInfos = [
+            {
+              target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+              url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-x.jpg',
+              // url: './asset/pos-x.jpg'
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+              url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-x.jpg',
+              // url: './asset/neg-x.jpg'
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+              url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-y.jpg',
+              // url: './asset/pos-y.jpg'
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+              url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-y.jpg',
+              // url: './asset/neg-y.jpg'
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+              url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/pos-z.jpg',
+              // url: './asset/pos-z.jpg'
+            },
+            {
+              target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+              url: 'https://webglfundamentals.org/webgl/resources/images/computer-history-museum/neg-z.jpg',
+              // url: './asset/neg-z.jpg'
+            },
+          ];
+        }
         faceInfos.forEach((faceInfo) => {
           const {target, url} = faceInfo;
 
@@ -641,7 +635,7 @@ function main() {
         // Make a view matrix from the camera matrix.
         const viewMatrix = m4.inverse(cameraMatrix);
 
-        var worldMatrix = m4.xRotation(obj[index].rotation[0]+degToRad(25));
+        var worldMatrix = m4.xRotation(degToRad(25));
         worldMatrix = m4.yRotate(worldMatrix, obj[index].rotation[1]);
 
         // Set the uniforms
@@ -727,6 +721,8 @@ function main() {
         // }else{
         // //   setColorsWhite(gl);
         // // }
+        obj[index].rotation[0] = degToRad(25);
+
         var uniforms = computeMatrix(
           matrix,
           viewProjectionMatrix,
