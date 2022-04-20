@@ -1,64 +1,62 @@
 # Hollow-Object-K04-G03
 
-Tubes 2 Grafika Komputer 2022
+Tubes 3 Grafika Komputer 2022
 
 ## Dibuat Oleh
 
 <hr/>
 
-1. 13519202 Farhan Yusuf Akbar
-2. 13519208 Awwala Nisa Kamila
-3. 13519215 Leonard Matheus
+1. 13519168 - Nabil Nabighah
+2. 13519170 - La Ode Rajuh Emoko
+3. 13519215 - Leonard Matheus
 
-<div class = "container-help">
-    <h2>I. Membuka/Load File Model</h2>
-    <hr/>
-    <ol>
-        <li><p>Pada menu sidebar 'File Model:', browse file model yang telah disiapkan</p><img src="asset/load-file-model.PNG"></li>
-        <li><p>Hasil jika file model di load akan menjadi seperti berikut.</p><img src="asset/load-hasil.PNG" width="1200px"></li>
-    </ol>
-</div>
+## Hasil
 
-<div class = "container-help">
-    <h2>II. Shading</h2>
-    <hr/>
-    <ol>
-        <li><p>Untuk memberikan warna pada model, switch menu "Shader" pada sidebar</p><img src="asset/shader.PNG"></li>
-        <li><p>Hasil jika shader diaktifkan akan menjadi seperti berikut.</p><img src="asset/shader-load.PNG" width="1200px"></li>
-    </ol>
-</div>
+Kami membuat program berupa Articulated Model. Program menggunakan WebGL, HTML, CSS dan Javascript dalam pembuatannya. Link program dapat dilihat pada link berikut.
 
-<div class = "container-help">
-    <h2>III. Mengubah jenis proyeksi</h2>
-    <hr/>
-    <ol>
-        <li><p>Untuk mengubah jenis proyeksi, pilih jenis proyeksi yang diinginkan pada menu di kanan atas web app</p><img src="asset/proyeksi-menu.PNG"></li>
-        <li><p>Hasil proyeksi perspective</p><img src="asset/proyeksi-perspective.PNG" width="1200px"></li>
-        <li><p>Hasil proyeksi orthographic</p><img src="asset/proyeksi-orthographic.PNG" width="1200px"></li>
-        <li><p>Hasil proyeksi oblique</p><img src="asset/proyeksi-oblique.PNG" width="1200px"></li>
-    </ol>
-</div>
+```
+https://gitlab.informatika.org/leo.matt.547/Articulated-Model-K04-G13
+```
 
-<div class = "container-help">
-    <h2>IV. Rotation, Translation, Scaling</h2>
-    <hr/>
-    <ol>
-        <li><p>Untuk melakukan rotasi, translasi, scaling pada model, geser slider yang ada pada sidebar</p><img src="asset/transformation.PNG"></li>
-    </ol>
-</div>
+Adapun struktur yang kami gunakan adalah representasi base yang membentuk tree untuk merepresentasikan child.
 
-<div class = "container-help">
-    <h2>V. Mengubah Jarak (Radius) Kamera View</h2>
-    <hr/>
-    <ol>
-        <li><p> Untuk mengubah jarak kamera view untuk mendekat atau menjauh dari model, geser slider yang ada sidebar</p><img src="asset/camera.PNG"></li>
-    </ol>
-</div>
+Berikut ini adalah hasil program yang telah kami buat.
 
-<div class = "container-help">
-    <h2>VI. Reset</h2>
-    <hr/>
-    <ol>
-        <li><p> Untuk reset semua konfigurasi yang dilakukan pada model, tekan tombol 'Reset' pada menu bagian kanan atas web app</p><img src="asset/proyeksi-menu.PNG"></li>
-    </ol>
-</div>
+### Model Alien (Environment Mapping)
+
+<img src="asset/alien.png"></img>
+
+### Model Duck (Texture Mapping)
+
+<img src="asset/duck.png"></img>
+
+### Model Kincir Angin (Bump Mapping)
+
+<img src="asset/kincir.png"></img>
+
+## Manual/Contoh Fungsionalitas Program
+
+### Load File
+
+- Pertama-tama, untuk load model ke dalam aplikasi, tekan tombol Pilih file
+- Model akan segera loading ke dalam website yang ada.
+  <img src="asset/load.png"></img>
+
+### Reset Konfigurasi
+
+Untuk mengembalikan model ke posisi semula, dapat menekan tombol reset.
+<img src="asset/reset.png"></img>
+
+### Setting Field of View & Rotation
+
+Untuk mengubah behaviour dari gerakan child dari root dapat menggeser toggle yang tersedia seperti terlihat pada gambar di bawah ini. Selain itu, toggle ini juga dapat menjauhkan posisi kamera dari jarak dekat maupun jauh.
+<img src="asset/setting.png"></img>
+
+### Setting Shader/Texture & Animation
+
+Untuk Mengubah shader warna, dapat menggunakan slider shader seperti ini kamera dari jarak dekat maupun jauh.
+<img src="asset/shader1.png"></img>
+
+<img src="asset/shader2.png"></img>
+
+Selain itu, tersedia tombol animasi yang dapat digunakan untuk menampilkan animasi random pada suatu waktu
