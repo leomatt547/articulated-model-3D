@@ -618,7 +618,13 @@ function main() {
         // Make a view matrix from the camera matrix.
         const viewMatrix = m4.inverse(cameraMatrix);
 
-        var worldMatrix = m4.xRotation(degToRad(25));
+        var worldMatrix;
+        if(obj[index].nama == "cube 3"){
+          worldMatrix = m4.xRotation(degToRad(0));
+        }
+        else{
+          worldMatrix = m4.xRotation(degToRad(25));
+        }
         worldMatrix = m4.yRotate(worldMatrix, obj[index].rotation[1]);
 
         // Set the uniforms
@@ -693,7 +699,10 @@ function main() {
         // }else{
         // //   setColorsWhite(gl);
         // // }
-        obj[index].rotation[0] = degToRad(25);
+        if(obj[index].nama != "cube 3"){
+          obj[index].rotation[0] = degToRad(25);
+        }
+        
 
         var uniforms = computeMatrix(
           matrix,
