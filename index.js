@@ -302,6 +302,15 @@ function main() {
             obj[selected_id].childs[iter].rotation[2] = angleInRadians;
           }
         }
+        else if(obj[selected_id].nama == "cube 3"){
+          if(iter == 2)
+          {
+            obj[selected_id].childs[iter].rotation[0] = 4*angleInRadians;
+          }
+          else if(iter == 3){
+            obj[selected_id].childs[iter].rotation[0] = degToRad(90)+ 4*angleInRadians; 
+          }
+        }
       }
       drawScene();
   }
@@ -427,7 +436,7 @@ function main() {
           faceInfos = [
             {
               target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-              // url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
+              //url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
               url: './asset/bump_normal.png',
               width: 1000,
               height:1000
@@ -435,35 +444,35 @@ function main() {
             {
               target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
               // url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
-              url: 'asset/bump_normal.png',
+              url: './asset/bump_normal.png',
               width: 1000,
               height:1000
             },
             {
               target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
               // url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
-              url: 'asset/bump_normal.png',
+              url: './asset/bump_normal.png',
               width: 1000,
               height:1000
             },
             {
               target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
               // url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
-              url: 'asset/bump_normal.png',
+              url: './asset/bump_normal.png',
               width: 1000,
               height:1000
             },
             {
               target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
               // url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
-              url: 'asset/bump_normal.png',
+              url: './asset/bump_normal.png',
               width: 1000,
               height:1000
             },
             {
               target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
               // url: 'http://www.paulsprojects.net/tutorials/simplebump/normal.jpg',
-              url: 'asset/bump_normal.png',
+              url: './asset/bump_normal.png',
               width: 1000,
               height:1000
             },
