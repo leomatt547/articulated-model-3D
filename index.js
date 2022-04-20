@@ -1,4 +1,5 @@
 "use strict";
+
 let MatType = Float32Array;
 let obj = Object;
 let angle = Number;
@@ -6,6 +7,9 @@ let input = Object;
 let selected_id = Number;
 let input_change = Boolean;
 let then = Number;
+let Animation = [Boolean, Boolean]; //[0: naik/turun, 1: nyala]
+
+Animation[1] = false;
 
 Object.size = function(obj) {
   var size = 0,
@@ -25,8 +29,6 @@ document.getElementById('load-button')
       document.getElementById('output')
               .innerHTML=fr.result;
       input_change = true;
-      // console.log(fr.result)
-      // hollow_objects();
       main();
   }
   fr.readAsText(this.files[0]); 
@@ -47,6 +49,7 @@ function degToRad(d) {
   return d * Math.PI / 180;
 }
 
+
 function main() {
   var isi = document.getElementById("output").innerHTML;
   if(typeof isi !== 'undefined' && isi !== null && isi!="") {
@@ -55,7 +58,8 @@ function main() {
 
   obj = input.models;
   selected_id = 0;
-  angle = 0;
+  angle = -45;
+  Animation = [true,false];
 
   var fieldOfViewRadians, 
     cameraAngleRadians , 
@@ -75,7 +79,6 @@ function main() {
       obj[index].buffer = new Float32Array(obj[index].buffer);
       obj[index].color = new Uint8Array(obj[index].color);
       obj[index].translation = new Float32Array(obj[index].translation);
-      // console.log(obj[index].normal)
       if(obj[index].normal != undefined){
         obj[index].normal = new Float32Array(obj[index].normal);
       }
@@ -84,13 +87,6 @@ function main() {
       }
       obj[index].scale  = [1,1,1];
       obj[index].rotation =  new Array(obj[index].rotation);
-      console.log(obj[index].rotation)
-      // console.log("Index ke " + index);
-      // obj[index].rotation = [degToRad(0),degToRad(0),degToRad(0)];
-      // if(obj[index].rotation != undefined){
-      //   obj[index].rotation = [degToRad(obj[index].rotation[0]),degToRad(obj[index].rotation[1]),degToRad(obj[index].rotation[2])];
-      //   // console.log(obj[index].rotation)
-      // }
       obj[index].rotation = [degToRad(0),degToRad(0),degToRad(0)];
       obj[index].iscolor = true;
     }
@@ -241,21 +237,12 @@ function main() {
   }
   animationnya.oninput = function(){
     if(this.checked){
-      setInterval(updateRotation(0, this), 1);
-    };
-    // while(this.checked){
-    //   setInterval(updateRotation(0, this), 1);
-    //   if(!this.checked){
-    //     break;
-    //   }
-    // }
+      Animation[1] = true;
+      updateRotation(0);
+    }else{
+      Animation[1] = false;
+    }
   }
-  // function updateRotationController(nyala){
-  //   while(true){
-  //     setInterval(updateRotation(0, this), 1);
-  //     if()
-  //   }
-  // }
   fieldOfViewSlider.oninput = function() {
       updateFieldOfView(this);
   }
@@ -275,13 +262,14 @@ function main() {
     drawScene();
   }
   function updateRotation(index,ui) {
-      var angleInDegrees = (parseInt(ui.value));
-      // console.log(angle);
-      // angle = angle + 0.01;
-      // var angleInDegrees = angle; 
+      if (ui === undefined) {
+        angle = Math.floor(Math.random() * (45 - (-45) + 1) ) + (-45);
+        var angleInDegrees = angle; 
+      }else{
+        var angleInDegrees = (parseInt(ui.value));
+      }
       var angleInRadians = angleInDegrees * Math.PI / 180;
       for(var iter=0; iter<Object.size(obj[selected_id].childs); iter++){
-        // console.log(obj[selected_id].nama);
         if(obj[selected_id].nama == "cube 1"){
           if(iter % 2 == 0){
             obj[selected_id].childs[iter].rotation[index] = angleInRadians;
@@ -328,11 +316,12 @@ function main() {
   // Draw the scene.
   function drawScene(){
     // Draw the scene env.
-    if(input_change){
-      // Clear the canvas AND the depth buffer.
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      input_change = false;
-    }
+    // if(input_change){
+    //   // Clear the canvas AND the depth buffer.
+    //   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    //   input_change = false;
+    // }
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     var zNear = 1;
     var zFar = 2000;
@@ -539,13 +528,6 @@ function main() {
           const image = new Image();
           image.crossOrigin = "anonymous";
           image.src = url;
-          // image.addEventListener('load', function() {
-          //   // Now that the image has loaded make copy it to the texture.
-          //   console.log("Masuk");
-          //   // gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-          //   // gl.texImage2D(target, level, internalFormat, format, type, image);
-          //   // gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-          // });
           gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
           gl.texImage2D(target, level, internalFormat, format, type, image);
           gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
@@ -725,6 +707,10 @@ function main() {
       obj[index] = init_child(obj[index]);
       // requestAnimationFrame(drawScene);
       draw_scene_child(obj[index], viewProjectionMatrix);
+      // if(Animation[1]){
+      //   updateRotation(0);
+      //   // drawScene();
+      // };
     }
   }
 
@@ -801,9 +787,6 @@ function main() {
       }else{
         setColorsWhite(gl);
       }
-
-      // parent.childs[index_child].rotation[0] += degToRad(0.6 * deltaTime); 
-
       var uniforms_child = computeMatrix(
         matrix,
         viewProjectionMatrix,
@@ -812,7 +795,6 @@ function main() {
         parent.childs[index_child].scale);
       
       // Set the uniforms we just computed
-      // twgl.setUniforms(programInfo, object.uniforms);
       gl.uniformMatrix4fv(matrixLocation, false, uniforms_child);
       
       // Draw the geometry.
